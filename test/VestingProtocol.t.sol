@@ -6,7 +6,7 @@ import {Test} from "forge-std/Test.sol";
 import {VestingProtocol} from "../src/VestingProtocol.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-// Mock token, само за тестове - минтваме си колкото искаме
+// Mock token
 
 contract MockToken is ERC20 {
 
@@ -26,18 +26,16 @@ contract VestingProtocolTest is Test {
     uint256 public constant DURATION = 365 days;
 
 
-    // setUp() се вика преди всеки тест - чисто състояние всеки път
+    
     function setUp() public {
 
         token = new MockToken();
         // match constructor signature (beneficiary, token, duration, totalAmount)
         vesting = new VestingProtocol(beneficiary, address(token), DURATION, TOTAL_AMOUNT);
-        // прехвърляме токените, които ще се vest-ват, в контракта
         token.transfer(address(vesting), TOTAL_AMOUNT);
 
     }
 
-    // Проверява, че constructor-ът е записал правилно данните
     function test_ConstructorSetsCorrectValues() public view {
 
         assertEq(vesting.beneficiary(), beneficiary);
@@ -46,11 +44,8 @@ contract VestingProtocolTest is Test {
 
     }
 
-    // На половината от периода трябва да е vested точно половината сума
-
     function test_VestedAmount_IsHalf_AtHalfDuration() public {
 
-        // vm.warp премества времето напред - симулираме, че е минала половин година
         vm.warp(block.timestamp + DURATION / 2);
         assertEq(vesting.vestedAmount(), TOTAL_AMOUNT / 2);
 
